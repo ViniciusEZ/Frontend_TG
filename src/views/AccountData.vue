@@ -24,7 +24,7 @@
           <v-divider></v-divider>
   
           <v-row>
-            <!-- Informações Pessoais -->
+
             <v-col cols="12" md="6">
               <v-form>
                 <v-text-field
@@ -57,7 +57,7 @@
               </v-form>
             </v-col>
   
-            <!-- Endereços -->
+
             <v-col cols="12" md="6">
               <h3>Endereços</h3>
               <v-divider class="mb-4"></v-divider>
@@ -78,8 +78,7 @@
           </v-row>
         </v-card>
       </v-container>
-  
-      <!-- Snackbar para notificações -->
+
       <v-snackbar v-model="snackbar" timeout="3000" top right>
         {{ snackbarMessage }}
         <template v-slot:action="{ attrs }">

@@ -1,4 +1,4 @@
-<!-- src/components/SimpleNavbar.vue -->
+
 <template>
     <v-app-bar
       app
@@ -15,7 +15,7 @@
         Asteri
       </v-app-bar-title>
   
-      <!-- Botões de Navegação -->
+
       <div class="d-flex align-center">
         <v-btn
           text

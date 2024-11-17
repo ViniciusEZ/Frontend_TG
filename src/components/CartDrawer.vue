@@ -57,7 +57,7 @@
                 </v-card>
             </v-list-item>
 
-             <!-- Paginação -->
+         
             <v-list-item v-if="totalPages > 1">
                 <v-list-item-content>
                 <v-pagination

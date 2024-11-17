@@ -245,7 +245,7 @@
     let sum = 0;
     let remainder;
   
-    // First verification digit
+
     for (let i = 1; i <= 9; i++) {
       sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
     }

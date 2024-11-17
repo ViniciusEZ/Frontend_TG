@@ -45,17 +45,16 @@
   
   const router = useRouter();
   
-  // Função para navegar para a Home
+
   const goHome = () => {
     router.push({ name: 'home' });
   };
   
-  // Função para navegar para a página de Login
   const goToLogin = () => {
     router.push({ name: 'login' });
   };
   
-  // Função para navegar para a página de Registro
+
   const goToRegister = () => {
     router.push({ name: 'register' });
   };

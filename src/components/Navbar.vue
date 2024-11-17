@@ -125,7 +125,7 @@
   import { useUserStore } from '@/stores/userStore';
   import { useRouter } from 'vue-router';
   
-  // Define os emits do componente
+
   const emit = defineEmits(['search', 'toggle-sidebar', 'open-cart']);
   
   const cartStore = useCartStore();
@@ -160,12 +160,12 @@
     }
   };
   
-  // Função para navegar para a página inicial
+
   const goHome = () => {
     router.push({ name: 'home' });
   };
   
-  // Funções para navegação a partir das opções de usuário
+
   const goToAccountData = () => {
     router.push({ name: 'account-data' });
   };
@@ -179,7 +179,7 @@
     router.push({ name: 'home' });
   };
   
-  // Funções para navegar para login e cadastro
+
   const goToLogin = () => {
     router.push({ name: 'login' });
   };
@@ -188,7 +188,7 @@
     router.push({ name: 'register' });
   };
   
-  // Funções para emitir eventos para o componente pai
+
   const emitToggleSidebar = () => {
     emit('toggle-sidebar');
   };

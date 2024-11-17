@@ -1,29 +1,66 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '@/views/Home.vue';
-import SearchResults from '@/views/SearchResults.vue';
-import ProductDetails from '@/views/ProductDetails.vue';
+import { useUserStore } from '@/stores/userStore';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BACKEND_URL),
   routes: [
     {
       path: '/',
       name: 'home',
-      component: Home,
+      component: import('@/views/Home.vue'),
     },
     {
       path: '/search',
       name: 'search-results',
-      component: SearchResults,
+      component: import('@/views/SearchResults.vue'),
       props: route => ({ query: route.query.q })
     },
     {
       path: '/product/:id',
       name: 'product-details',
-      component: ProductDetails,
+      component: import('@/views/ProductDetails.vue'),
       props: true
-    }
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: import('@/views/Login.vue'),
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: import('@/views/Register.vue'),
+    },
+    {
+      path: '/account-data',
+      name: 'account-data',
+      component: import('@/views/AccountData.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/purchase-history',
+      name: 'purchase-history',
+      component: import('@/views/PurchaseHistory.vue'),
+      meta: { requiresAuth: true },
+    },
+    
+    // {
+    //   path: '/forgot-password',
+    //   name: 'forgot-password',
+    //   component: ForgotPassword,
+    // },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+
+  if (requiresAuth && !userStore.isAuthenticated) {
+    next({ name: 'login' });
+  } else {
+    next();
+  }
 });
 
 export default router;

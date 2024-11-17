@@ -1,7 +1,15 @@
 <template>
   <div>
 
-    <Navbar @open-cart="openCart" />
+    <Navbar 
+        @toggle-sidebar="toggleSidebar" 
+        @open-cart="openCart" 
+        @search="handleSearch"
+      />
+  
+
+      <Sidebar v-model="sidebar" />
+
     <CartDrawer
       v-model="cartDrawer"
       @snackbar-message="snackbarMessage = $event"
@@ -118,10 +126,12 @@ import CartDrawer from '@/components/CartDrawer.vue';
 import { formatToBrCurrency, handleError, alertComprar } from '@/utils/utils.js';
 import { getProduct } from '@/utils/rest.js';
 import { useCartStore } from '@/stores/cartStore';
+import Sidebar from '@/components/Sidebar.vue';
 
 const route = useRoute();
 const cartStore = useCartStore();
 
+const sidebar = ref(false);
 const product = ref({});
 const details = ref({});
 const supplier = ref('');
@@ -143,6 +153,10 @@ function handleAdicionarAoCarrinho() {
   snackbarMessage.value = `${product.value.name} adicionado ao carrinho.`;
   snackbar.value = true;
 }
+
+const toggleSidebar = () => {
+    sidebar.value = !sidebar.value;
+  };
 
 function handleComprar() {
   alertComprar(product.value);

@@ -1,7 +1,8 @@
 <template>
 
     
-    <Navbar @open-cart="openCart" />
+    <Navbar @open-cart="openCart" @toggle-sidebar="toggleSidebar" />
+    <Sidebar v-model="sidebar" />
 
     <CartDrawer 
       v-model="cartDrawer" 
@@ -118,117 +119,120 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useCartStore } from '@/stores/cartStore';
-import Navbar from '@/components/Navbar.vue';
-import CartDrawer from '@/components/CartDrawer.vue';
-import ProductCard from '@/components/ProductCard.vue';
-import { getSearchedProducts } from '@/utils/rest';
-import { sortProducts, handleError, alertComprar, formatToBrCurrency } from '@/utils/utils.js'; // Importação das funções
+  import { ref, onMounted, watch } from 'vue';
+  import { useRoute } from 'vue-router';
+  import { useCartStore } from '@/stores/cartStore';
+  import Navbar from '@/components/Navbar.vue';
+  import Sidebar from '@/components/Sidebar.vue'; 
+  import CartDrawer from '@/components/CartDrawer.vue';
+  import ProductCard from '@/components/ProductCard.vue';
+  import { getSearchedProducts } from '@/utils/rest';
+  import { alertComprar, formatToBrCurrency } from '@/utils/utils.js'; 
+  const sidebar = ref(false)
+  const cartStore = useCartStore();
+  const route = useRoute();
 
-const cartStore = useCartStore();
-const route = useRoute();
-
-const filterOptions = ['Mais vendidos', 'Preço decrescente', 'Preço crescente'];
-const products = ref([]);
-const suppliers = ref([]);
-const selectedFilter = ref(null);
-const selectedSuppliers = ref([]);
-const itemsPerPage = 12;
-const currentPage = ref(1);
-const loading = ref(false);
-const snackbar = ref(false);
-const pageCount = ref(0);
-const snackbarMessage = ref('');
-const cartDrawer = ref(false);
-const searchTerm = ref(route.query.q || '');
-const priceMin = ref(0);
-const priceMax = ref(0);
-const selectedPriceRange = ref([0, 0]);
-const totalProducts = ref(0);
+  const filterOptions = ['Mais vendidos', 'Preço decrescente', 'Preço crescente'];
+  const products = ref([]);
+  const suppliers = ref([]);
+  const selectedFilter = ref(null);
+  const selectedSuppliers = ref([]);
+  const itemsPerPage = 12;
+  const currentPage = ref(1);
+  const loading = ref(false);
+  const snackbar = ref(false);
+  const pageCount = ref(0);
+  const snackbarMessage = ref('');
+  const cartDrawer = ref(false);
+  const searchTerm = ref(route.query.q || '');
+  const priceMin = ref(0);
+  const priceMax = ref(0);
+  const selectedPriceRange = ref([0, 0]);
+  const totalProducts = ref(0);
 
 
+  const toggleSidebar = () => {
+    sidebar.value = !sidebar.value;
+  };
 
+  const fetchSearchedProducts = async () => {
+      loading.value = true;
+      try {
+          const filters = {
+              selectedSuppliers: selectedSuppliers.value,
+              minPrice: selectedPriceRange.value[0],
+              maxPrice: selectedPriceRange.value[1],
+          };
+          const data = await getSearchedProducts(
+              searchTerm.value,
+              currentPage.value,
+              selectedFilter.value || 'default',
+              filters
+          );
 
-const fetchSearchedProducts = async () => {
-    loading.value = true;
-    try {
-        const filters = {
-            selectedSuppliers: selectedSuppliers.value,
-            minPrice: selectedPriceRange.value[0],
-            maxPrice: selectedPriceRange.value[1],
-        };
-        const data = await getSearchedProducts(
-            searchTerm.value,
-            currentPage.value,
-            selectedFilter.value || 'default',
-            filters
-        );
+          products.value = data.results.products;
+          totalProducts.value = data.count;
+          pageCount.value = Math.ceil(totalProducts.value / itemsPerPage);
+          suppliers.value = data.results.suppliers;
 
-        products.value = data.results.products;
-        totalProducts.value = data.count;
-        pageCount.value = Math.ceil(totalProducts.value / itemsPerPage);
-        suppliers.value = data.results.suppliers;
+          priceMin.value = data.results.static_min;
+          priceMax.value = data.results.static_max;
 
-        priceMin.value = data.results.static_min;
-        priceMax.value = data.results.static_max;
+          if (selectedPriceRange.value[0] === 0 && selectedPriceRange.value[1] === 0) {
+              selectedPriceRange.value = [priceMin.value, priceMax.value];
+          }
 
-        if (selectedPriceRange.value[0] === 0 && selectedPriceRange.value[1] === 0) {
-            selectedPriceRange.value = [priceMin.value, priceMax.value];
-        }
+      } catch (error) {
+          console.error('Erro ao carregar produtos pesquisados:', error);
+      } finally {
+          loading.value = false;
+      }
+  };
 
-    } catch (error) {
-        console.error('Erro ao carregar produtos pesquisados:', error);
-    } finally {
-        loading.value = false;
+  const addToCart = (product) => {
+    cartStore.addToCart(product);
+    snackbarMessage.value = `${product.name} adicionado ao carrinho.`;
+    snackbar.value = true;
+  };
+
+  const comprar = (product) => {
+    alertComprar(product);
+  };
+
+  const openCart = () => {
+    cartDrawer.value = true;
+  };
+
+  const onPriceRangeChange = () => {
+    currentPage.value = 1;
+    console.log('Slider alterado:', selectedPriceRange.value);
+  };
+
+  watch(
+    () => route.query.q,
+    (newQuery) => {
+      searchTerm.value = newQuery;
+      console.log('Novo termo de pesquisa:', searchTerm.value);
+      fetchSearchedProducts();
     }
-};
+  );
 
-const addToCart = (product) => {
-  cartStore.addToCart(product);
-  snackbarMessage.value = `${product.name} adicionado ao carrinho.`;
-  snackbar.value = true;
-};
+  watch([searchTerm, currentPage], ([newSearchTerm, newPage]) => {
+      fetchSearchedProducts(newSearchTerm, newPage);
+  });
 
-const comprar = (product) => {
-  alertComprar(product);
-};
+  watch([searchTerm, currentPage, selectedFilter, selectedSuppliers, selectedPriceRange], () => {
+      fetchSearchedProducts();
+  });
 
-const openCart = () => {
-  cartDrawer.value = true;
-};
+  watch([searchTerm, currentPage, selectedFilter], () => {
+      fetchSearchedProducts();
+  });
 
-const onPriceRangeChange = () => {
-  currentPage.value = 1;
-  console.log('Slider alterado:', selectedPriceRange.value);
-};
-
-watch(
-  () => route.query.q,
-  (newQuery) => {
-    searchTerm.value = newQuery;
-    console.log('Novo termo de pesquisa:', searchTerm.value);
+ 
+  onMounted(() => {
     fetchSearchedProducts();
-  }
-);
-
-watch([searchTerm, currentPage], ([newSearchTerm, newPage]) => {
-    fetchSearchedProducts(newSearchTerm, newPage);
-});
-
-watch([searchTerm, currentPage, selectedFilter, selectedSuppliers, selectedPriceRange], () => {
-    fetchSearchedProducts();
-});
-
-watch([searchTerm, currentPage, selectedFilter], () => {
-    fetchSearchedProducts();
-});
-
-// Lifecycle Hook
-onMounted(() => {
-  fetchSearchedProducts();
-});
+  });
 </script>
 
 <style scoped>

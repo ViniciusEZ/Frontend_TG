@@ -1,7 +1,10 @@
 <template>
     <Navbar 
         @open-cart="openCart" 
+        @toggle-sidebar="toggleSidebar"
     />
+
+    <Sidebar v-model="sidebar" />
  
     <CartDrawer 
         v-model="cartDrawer" 
@@ -70,10 +73,11 @@
     import Navbar from '@/components/Navbar.vue'; 
     import CartDrawer from '@/components/CartDrawer.vue'; 
     import ProductCard from '@/components/ProductCard.vue'; 
-    import { sortProducts, handleError, alertComprar } from '@/utils/utils.js'; // Importação das funções
+    import { sortProducts, alertComprar } from '@/utils/utils.js'; 
+    import Sidebar from '@/components/Sidebar.vue'; 
 
     const cartStore = useCartStore();
-    
+    const sidebar = ref(false);     
     const filterOptions = ['Mais vendidos', 'Preço decrescente', 'Preço crescente'];
     const products = ref([]);
     const itemsPerPage = 12;
@@ -86,6 +90,7 @@
     const cartDrawer = ref(false); 
     const pageCount = ref(0);
 
+    
 
     const fetchProducts = async () => {
         loading.value = true;
@@ -100,6 +105,11 @@
             loading.value = false;
         }
     };
+
+    const toggleSidebar = () => {
+        sidebar.value = !sidebar.value;
+    };
+
     const filteredProducts = computed(() => {
         let tempProducts = sortProducts(products.value, selectedFilter.value);
         return tempProducts;

@@ -3,23 +3,6 @@ const envBaseUrl = import.meta.env.BACKEND_URL;
 const baseUrl = envBaseUrl ? envBaseUrl : 'http://localhost:8000';
 
 
-// async function getProducts() {
-//     return axios.get(
-//         `${baseUrl}/products/get-products`
-//     ).then((response) => {
-//         return response.data;
-//     }).catch(e => {});
-// }
-
-// async function getSearchedProducts(searchTerm) {
-//     return axios.get(
-//         `${baseUrl}/products/search/${searchTerm}`
-//     ).then((response) => {
-//         return response.data
-//     }).catch(e => {})
-// }
-
-
 async function getProducts(page = 1, sortOption = 'default') {
     const params = new URLSearchParams();
     params.append('page', page);
@@ -33,7 +16,6 @@ async function getProducts(page = 1, sortOption = 'default') {
         console.error(e);
     });
 }
-
 
 
 async function getSearchedProducts(searchTerm, page = 1, sortOption = 'default', filters = {}) {
@@ -69,9 +51,33 @@ async function getProduct(productId) {
     }).catch(e => {});
 }
 
+async function getUser(userEmail) {
+    return axios.post(
+        `${baseUrl}/user/get-user`, 
+        {
+            userEmail
+        }
+    ).then(response => {
+        return response.data
+    }).catch(e => {})
+}
+
+async function userPurchaseHistory(userEmail) {
+    return axios.post(
+        `${baseUrl}/user/purchase-history`, 
+        {
+            userEmail
+        }
+    ).then(response => {
+        return response.data
+    }).catch(e => {})
+}
+
 export {
     baseUrl,
     getProducts,
     getSearchedProducts,
-    getProduct
+    getProduct,
+    getUser,
+    userPurchaseHistory
 }

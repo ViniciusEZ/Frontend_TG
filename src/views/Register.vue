@@ -355,7 +355,7 @@
   }
   
   .fill-height {
-    min-height: calc(100vh - 64px); /* Adjust based on your Navbar height */
+    min-height: calc(100vh - 64px);
   }
   
   .address-section {

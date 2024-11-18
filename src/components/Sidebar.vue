@@ -64,8 +64,14 @@
   
 
   const navigateTo = (routeName) => {
-    emit('update:modelValue', false); 
-    router.push({ name: routeName });
+    emit('update:modelValue', false);
+    if (routeName === "search-results") {
+      router.push({ name: routeName, query: {q: 'RTX' } })
+    } 
+    else {
+      router.push({ name: routeName });
+    } 
+      
   };
   
 
